@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SCHEMA_VERSION = "1.0";
@@ -205,10 +204,10 @@ const SCHEDULES = [
       "Communicate regularly about schedules, activities, and the child's week.",
     ],
     childPerspective: [
-      "Exchanges occur multiple times each week.",
-      "Personal items may need to be available in both homes, school materials, clothing, medications, a favorite toy.",
-      "Because exchanges happen frequently, differences between households are felt more often. Consistency in routines across both homes matters more than parents often expect.",
-      "The child stays in regular contact with both parents throughout the week.",
+      "Frequent moves between households may require an adjustment period as the child settles into each home's rhythm. The regularity of the pattern, once established, can help.",
+      "Having familiar items available in both homes and vehicles may help the child feel grounded across frequent transitions. School materials, clothing, and medications may need to be duplicated between households.",
+      "When routines such as bedtime and homework are consistent across both homes, the child is less likely to experience the frequency of exchanges as disorienting.",
+      "The child stays in regular physical contact with both parents throughout the week, regardless of how contact is also maintained during the other parent's time.",
     ],
     coordination: "Frequent exchanges mean both parents need to manage consistent routines, homework, bedtime, school preparation, and stay in close communication about the child's week.",
     considerations: "How easily exchanges fit into school mornings, activities, and evening routines depends significantly on the distance between households and real-world commute conditions. The pace of this schedule means differences between households are felt regularly.",
@@ -223,9 +222,9 @@ const SCHEDULES = [
     bestFor: "Families wanting consistent weekday involvement with some extended blocks",
     helpsWorkWell: [
       "Understand the repeating pattern clearly. Both parents and the child benefit from knowing what comes next.",
-      "Handle responsibilities consistently across both households.",
-      "Keep weekday routines predictable.",
-      "Communicate clearly as the schedule shifts between shorter and extended blocks.",
+      "Consistent handling of responsibilities across both households reduces friction as the pattern shifts.",
+      "Predictable weekday routines give the child stability within the varying block lengths.",
+      "Clear communication as the schedule shifts between shorter and extended blocks reduces confusion for everyone.",
     ],
     childPerspective: [
       "Exchanges follow a predictable but varied pattern. Both short stays and longer stays are part of the routine.",
@@ -260,20 +259,21 @@ const SCHEDULES = [
   },
   {
     id: "altweekends", name: "Alternating Weekends", type: "Unequal time-sharing",
-    pattern14: [0,0,0,0,0,1,1,0,0,0,0,1,1,0],
-    use28: false,
+
+    use28: true,
+    pattern28: [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     transitions: "Biweekly weekends, plus possible weekday time",
     bestFor: "When one parent has primary residence; the other maintains consistent scheduled involvement",
     helpsWorkWell: [
-      "Keep the schedule predictable across both households.",
-      "Plan deliberately to maintain the child's connection during weekday periods.",
-      "Communicate regularly about school, activities, and schedule changes.",
-      "Maintain ongoing involvement from both parents in the child's routines and activities.",
+      "Keep expectations around meals, bedtime, and daily routines consistent across both households, not just within each one.",
+      "Plan deliberately for how the non-primary parent stays connected during weekday periods, through calls, attendance at school events, or other touchpoints.",
+      "Communicate regularly about school, activities, and schedule changes so neither parent is caught off guard.",
+      "Maintain meaningful involvement from both parents in the child's routines and activities, even when time is not equally distributed.",
     ],
     childPerspective: [
-      "Most weekday routines occur within one household.",
-      "Time with the other parent follows a predictable pattern. Exchanges often occur around weekends or designated weekdays.",
-      "The child experiences different rhythms between weekday and weekend time.",
+      "The predictability of the pattern can provide a sense of stability, the child knows when they will see each parent.",
+      "Weekday life is centered in one home, which can create consistency in school routines, friendships, and daily structure.",
+      "The rhythm between weekday and weekend time is distinct. Maintaining connection with the non-primary parent during the week, through calls, messages, or brief contact, supports the child's relationship with both parents.",
     ],
     coordination: "Fewer exchanges mean less frequent coordination, but maintaining the child's connection to both parents requires deliberate planning and regular communication between handoffs.",
     considerations: "Time is not distributed equally and responsibilities are concentrated differently between households. Additional planning is required to maintain continuity and ensure the child remains connected to both parents.",
@@ -283,6 +283,8 @@ const SCHEDULES = [
     id: "workbased", name: "Work-Based Schedule", type: "Non-traditional",
     pattern14: [0,0,0,0,0,0,0,1,1,1,1,0,0,0],
     use28: false,
+    noGrid: true,
+    gridDescription: "Work-based schedules vary by profession and work cycle. Rather than a fixed weekly pattern, parenting time is structured around when each parent is available. The visual below represents one possible cycle, the actual pattern depends on each parent's work schedule.",
     transitions: "Tied to work cycles, not fixed days of the week",
     bestFor: "Maritime, healthcare, aviation, emergency services, long-haul transportation, or other rotating-shift professions",
     helpsWorkWell: [
@@ -292,33 +294,53 @@ const SCHEDULES = [
       "Define what advance notice looks like in practice.",
     ],
     childPerspective: [
-      "Time with each parent may vary based on work availability. The schedule may not follow a consistent weekly pattern.",
-      "Exchanges are tied to work cycles rather than specific days of the week.",
-      "Routines may adjust depending on when each parent is available.",
+      "Variation in the schedule may initially seem unpredictable, but a rhythm often emerges for the child over time as the work cycle becomes familiar.",
+      "Communication with the non-timesharing parent may be less predictable during work periods due to the demands and location of that parent's job.",
+      "The parent who is home between work cycles often has greater flexibility to be fully present, which can make that time feel more immersive for the child.",
     ],
-    coordination: "Sharing work schedules as early as possible and communicating changes promptly is what makes this structure workable for the child. Last-minute changes are harder to absorb when a schedule has no fixed weekly pattern.",
+    coordination: "Track and share upcoming work schedules as early as possible. Notify the other parent of changes promptly when they occur. Keep a record of schedule communications so both parents have a shared reference point.",
     considerations: "Work-based schedules are less predictable and require more ongoing coordination than fixed-day structures. Plans for these arrangements benefit significantly from explicit language around advance notice requirements, flexibility expectations, and how schedule changes are communicated and documented.",
     example: "The parties shall share physical custody based on Parent A's work schedule. Parent A shall provide advance notice of work periods and available parenting time no later than [X] days in advance. Parenting time shall occur during periods of availability, with the child residing with Parent B during work periods. The parties shall coordinate scheduling to maintain consistency for the child.",
   },
 ];
 
 function ScheduleGrid({ pattern14, pattern28, use28 }) {
-  const pattern = use28 ? pattern28 : pattern14;
-  const days = use28 ? DAYS_28 : ["M","T","W","T","F","S","S","M","T","W","T","F","S","S"];
-  const weekLabels = use28
-    ? [0,7,14,21]
-    : [0,7];
+  const DAYS_14 = ["M","T","W","T","F","S","S","M","T","W","T","F","S","S"];
 
+  if (use28 && pattern28) {
+    // Stack 28-day grid as two rows of 14
+    const row1 = pattern28.slice(0,14);
+    const row2 = pattern28.slice(14,28);
+    const renderRow = (pat, wkStart) => (
+      <div style={{display:"flex",gap:3,marginBottom:4}}>
+        {pat.map((v,i) => (
+          <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
+            <div style={{width:27,height:27,borderRadius:4,background:v===0?NAVY:AMBER,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:500,color:"#fff"}}>{DAYS_14[i]}</div>
+            {i===0?<div style={{fontSize:7,color:SLATE}}>Wk{wkStart}</div>:<div style={{fontSize:7,color:"transparent"}}>.</div>}
+          </div>
+        ))}
+      </div>
+    );
+    return (
+      <div style={{marginTop:12}}>
+        {renderRow(row1,1)}
+        {renderRow(row2,3)}
+        <div style={{display:"flex",gap:16,marginTop:6,fontSize:11,color:SLATE}}>
+          <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:10,height:10,borderRadius:2,background:NAVY,display:"inline-block"}}></span>Parent A</span>
+          <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:10,height:10,borderRadius:2,background:AMBER,display:"inline-block"}}></span>Parent B</span>
+        </div>
+      </div>
+    );
+  }
+
+  const pattern = pattern14 || [];
   return (
     <div style={{marginTop:12}}>
       <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
-        {days.map((d,i) => (
+        {DAYS_14.map((d,i) => (
           <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
             <div style={{width:28,height:28,borderRadius:4,background:pattern[i]===0?NAVY:AMBER,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:500,color:"#fff"}}>{d}</div>
-            {weekLabels.includes(i)
-              ? <div style={{fontSize:8,color:SLATE}}>Wk{weekLabels.indexOf(i)+1}</div>
-              : <div style={{fontSize:8,color:"transparent"}}>.</div>
-            }
+            {i===0?<div style={{fontSize:8,color:SLATE}}>Wk1</div>:i===7?<div style={{fontSize:8,color:SLATE}}>Wk2</div>:<div style={{fontSize:8,color:"transparent"}}>.</div>}
           </div>
         ))}
       </div>
@@ -346,15 +368,15 @@ function P({ children }) {
   return <p style={{fontSize:13.5,color:SLATE,lineHeight:1.8,margin:"0 0 11px"}}>{children}</p>;
 }
 
-function ChildPerspective({ items }) {
+function ChildPerspective({ items, showHeader=true }) {
   return (
     <div style={{background:NAVY,borderRadius:10,padding:"15px 18px",margin:"18px 0"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:11}}>
+      {showHeader&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:11}}>
         <div style={{width:20,height:20,borderRadius:"50%",background:"rgba(201,151,74,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <span style={{fontSize:11,color:AMBER}}>◎</span>
         </div>
         <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:AMBER}}>WHAT THIS LOOKS LIKE FROM THE CHILD'S PERSPECTIVE</div>
-      </div>
+      </div>}
       {items.map((item,i) => (
         <div key={i} style={{display:"flex",gap:9,marginBottom:i<items.length-1?7:0}}>
           <div style={{width:4,height:4,borderRadius:"50%",background:AMBER,marginTop:8,flexShrink:0}}></div>
@@ -365,10 +387,10 @@ function ChildPerspective({ items }) {
   );
 }
 
-function HelpsWorkWell({ items }) {
+function HelpsWorkWell({ items, showHeader=true }) {
   return (
     <div style={{background:"#F5F9F5",border:"1px solid #C8DFC8",borderRadius:8,padding:"13px 16px",margin:"12px 0"}}>
-      <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#4A7A4A",marginBottom:7}}>WHAT HELPS THIS WORK WELL</div>
+      {showHeader&&<div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#4A7A4A",marginBottom:7}}>WHAT HELPS THIS WORK WELL</div>}
       {items.map((item,i) => (
         <div key={i} style={{display:"flex",gap:8,fontSize:13,color:SLATE,lineHeight:1.7,marginBottom:i<items.length-1?3:0}}>
           <span style={{color:"#4A7A4A",flexShrink:0}}>+</span><span>{item}</span>
@@ -378,10 +400,10 @@ function HelpsWorkWell({ items }) {
   );
 }
 
-function CoordBlock({ intro, items }) {
+function CoordBlock({ intro, items, showHeader=true }) {
   return (
     <div style={{background:"#F0F4F8",borderRadius:8,padding:"13px 16px",margin:"12px 0"}}>
-      <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:SLATE,marginBottom:7}}>COORDINATION AND COMMUNICATION</div>
+      {showHeader&&<div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:SLATE,marginBottom:7}}>COORDINATION AND COMMUNICATION</div>}
       {intro&&<div style={{fontSize:13,color:SLATE,lineHeight:1.7,marginBottom:8,fontStyle:"italic"}}>{intro}</div>}
       {items.map((item,i) => (
         <div key={i} style={{display:"flex",gap:8,fontSize:13,color:SLATE,lineHeight:1.7,marginBottom:i<items.length-1?3:0}}>
@@ -392,19 +414,19 @@ function CoordBlock({ intro, items }) {
   );
 }
 
-function ConsiderBlock({ children }) {
+function ConsiderBlock({ children, showHeader=true }) {
   return (
     <div style={{border:`1px solid ${RULE}`,borderRadius:8,padding:"13px 16px",margin:"12px 0",background:"#fff"}}>
-      <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#999",marginBottom:7}}>CONSIDERATIONS</div>
+      {showHeader&&<div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#999",marginBottom:7}}>CONSIDERATIONS</div>}
       <div style={{fontSize:13,color:SLATE,lineHeight:1.8}}>{children}</div>
     </div>
   );
 }
 
-function ExampleBlock({ children }) {
+function ExampleBlock({ children, showHeader=true }) {
   return (
     <div style={{background:"#EEF2FF",borderRadius:8,padding:"13px 16px",margin:"12px 0"}}>
-      <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#6B7DB3",marginBottom:7}}>EXAMPLE LANGUAGE, FOR REFERENCE ONLY</div>
+      {showHeader&&<div style={{fontSize:10,fontWeight:600,letterSpacing:"0.1em",color:"#6B7DB3",marginBottom:7}}>EXAMPLE LANGUAGE, FOR REFERENCE ONLY</div>}
       <div style={{fontSize:12.5,color:"#3D4E7A",lineHeight:1.75,fontStyle:"italic"}}>{children}</div>
     </div>
   );
@@ -462,7 +484,10 @@ function CollapsibleSubsection({ label, children, defaultOpen=true }) {
 function ScheduleCardContent({ s }) {
   return (
     <div style={{padding:"0 17px 18px"}}>
-      <ScheduleGrid pattern14={s.pattern14} pattern28={s.pattern28} use28={s.use28} />
+      {s.noGrid
+        ? <div style={{background:"#f8f7f5",borderRadius:8,padding:"12px 16px",margin:"12px 0",fontSize:13,color:SLATE,lineHeight:1.7}}>{s.gridDescription}</div>
+        : <ScheduleGrid pattern14={s.pattern14} pattern28={s.pattern28} use28={s.use28} />
+      }
       <div style={{marginTop:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
         <div style={{background:"#f8f7f5",borderRadius:8,padding:"9px 12px"}}>
           <div style={{fontSize:10,fontWeight:600,color:AMBER,marginBottom:3}}>TRANSITIONS</div>
@@ -474,19 +499,19 @@ function ScheduleCardContent({ s }) {
         </div>
       </div>
       <CollapsibleSubsection label="WHAT THIS LOOKS LIKE FROM THE CHILD'S PERSPECTIVE">
-        <ChildPerspective items={s.childPerspective} />
+        <ChildPerspective items={s.childPerspective} showHeader={false} />
       </CollapsibleSubsection>
       <CollapsibleSubsection label="WHAT HELPS THIS WORK WELL">
-        <HelpsWorkWell items={s.helpsWorkWell} />
+        <HelpsWorkWell items={s.helpsWorkWell} showHeader={false} />
       </CollapsibleSubsection>
       <CollapsibleSubsection label="COORDINATION AND COMMUNICATION">
-        <CoordBlock intro={null} items={[s.coordination]} />
+        <CoordBlock intro={null} items={[s.coordination]} showHeader={false} />
       </CollapsibleSubsection>
       <CollapsibleSubsection label="CONSIDERATIONS">
-        <ConsiderBlock>{s.considerations}</ConsiderBlock>
+        <ConsiderBlock showHeader={false}>{s.considerations}</ConsiderBlock>
       </CollapsibleSubsection>
       <CollapsibleSubsection label="EXAMPLE LANGUAGE">
-        <ExampleBlock>{s.example}</ExampleBlock>
+        <ExampleBlock showHeader={false}>{s.example}</ExampleBlock>
       </CollapsibleSubsection>
     </div>
   );
@@ -524,6 +549,74 @@ function ReflectSection({ sectionId, session, onAnswer, onFlag }) {
   );
 }
 
+function HowToUsePanel() {
+  const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+
+  const coreFeatures = [
+    ["Learn tab", "Educational content for each topic, how that part of a parenting plan works, what it looks like in practice, and what to watch for."],
+    ["Compare or Explore tab", "Interactive comparisons of different approaches and structures. Multiple items can be open at the same time."],
+    ["Reflect tab", "Guided questions that capture your thoughts and build your preparation document as you go."],
+  ];
+
+  const additionalFeatures = [
+    ["Quick Notes", "A freeform notes field in the bottom right of the progress panel. Park thoughts as they occur, questions to raise, things to follow up on."],
+    ["Flag for Discussion", "Within each reflection question, the flag icon marks that item for your discussion list. Flagged items surface at the top of your preparation summary."],
+    ["Your Summary", "The button in the top right assembles everything you have answered into a preparation document you can review, print, or save as a PDF."],
+    ["Progress Tracking", "The right panel shows your overall progress and per-section completion. It can be collapsed using the Progress button if you want a full-width workspace."],
+    ["Collapsible Sections", "Within each section, subsections can be collapsed individually using the arrow on the left. They open by default, collapse them once you are familiar with the content."],
+  ];
+
+  return (
+    <div style={{border:`1px solid ${RULE}`,borderRadius:8,overflow:"hidden",margin:"0 0 20px"}}>
+      <div
+        onClick={()=>setOpen(!open)}
+        style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 16px",cursor:"pointer",background:open?"#f8f7f5":"#fff"}}
+      >
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:11,color:AMBER,transform:open?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.15s",display:"inline-block",lineHeight:1}}>▶</span>
+          <span style={{fontSize:13,fontWeight:600,color:NAVY}}>What's Included in This System</span>
+        </div>
+        <span style={{fontSize:11,color:SLATE}}>{open?"Hide":"Show features"}</span>
+      </div>
+      {open&&(
+        <div style={{padding:"4px 16px 16px",background:"#f8f7f5"}}>
+          <P>This system is organized into sections you can work through at your own pace. Here is what is available in each section and throughout the system.</P>
+          <div style={{display:"flex",flexDirection:"column",gap:5,marginBottom:8}}>
+            {coreFeatures.map(([feature,desc])=>(
+              <div key={feature} style={{display:"flex",gap:9,padding:"7px 11px",background:"#fff",border:`1px solid ${RULE}`,borderRadius:6}}>
+                <div style={{width:3,borderRadius:2,background:AMBER,flexShrink:0,alignSelf:"stretch"}}></div>
+                <div>
+                  <div style={{fontSize:12.5,fontWeight:600,color:NAVY,marginBottom:1}}>{feature}</div>
+                  <div style={{fontSize:12,color:SLATE,lineHeight:1.6}}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {!showAll&&(
+            <button onClick={(e)=>{e.stopPropagation();setShowAll(true);}} style={{fontSize:11,color:AMBER,background:"none",border:"none",cursor:"pointer",padding:"4px 0",fontFamily:"Inter,sans-serif",fontWeight:500}}>
+              + Show additional features
+            </button>
+          )}
+          {showAll&&(
+            <div style={{display:"flex",flexDirection:"column",gap:5}}>
+              {additionalFeatures.map(([feature,desc])=>(
+                <div key={feature} style={{display:"flex",gap:9,padding:"7px 11px",background:"#fff",border:`1px solid ${RULE}`,borderRadius:6}}>
+                  <div style={{width:3,borderRadius:2,background:AMBER,flexShrink:0,alignSelf:"stretch"}}></div>
+                  <div>
+                    <div style={{fontSize:12.5,fontWeight:600,color:NAVY,marginBottom:1}}>{feature}</div>
+                    <div style={{fontSize:12,color:SLATE,lineHeight:1.6}}>{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function IntroLearn() {
   return (
     <div>
@@ -533,6 +626,7 @@ function IntroLearn() {
       <SH>How This System Is Organized</SH>
       <P>This system is organized based on how parenting plans function in real life, rather than how they are grouped in a specific legal document. The same concepts may appear in different sections depending on the attorney, mediator, or court involved.</P>
       <P>For example: education and medical decisions may appear within legal custody in some plans and as separate sections in others. Extracurricular activities could be grouped under decision-making, scheduling, or a separate category. Communication and information sharing might appear in different locations depending on how the plan is structured. These differences in organization do not change how a parenting plan functions in practice.</P>
+      <HowToUsePanel />
       <SH>What This System Covers</SH>
       <div style={{display:"flex",flexDirection:"column",gap:7,margin:"10px 0"}}>
         {[
@@ -582,7 +676,7 @@ function IntroLearn() {
 function ProcessLearn() {
   return (
     <div>
-      <Orientation>Oftentimes, parents first encounter the idea of a parenting plan when they are already in the middle of a trying situation. They may not know what one is, let alone what is required to create a comprehensive one. Understanding how the development process works, before you are in the middle of it, reduces the anxiety that comes from not knowing what comes next.</Orientation>
+      <Orientation>Oftentimes, parents first encounter the idea of a parenting plan when they are already in the middle of a trying situation. They may not know what a parenting plan is, let alone what is required to create a comprehensive one. Understanding how the development process works, before you are in the middle of it, reduces the anxiety that comes from not knowing what comes next.</Orientation>
       <P>Parenting plans are built over time through discussion, revision, and in some cases formal legal procedures. The process does not follow a fixed sequence. Progress often occurs in stages, and earlier decisions are revisited as the overall structure becomes clearer.</P>
       <SH>Early Stages and Temporary Arrangements</SH>
       <P>The process sometimes begins with a formal legal filing. Other times, discussions start informally between parents before any legal action is taken. Short-term arrangements may be used during this period to provide immediate structure for the child.</P>
@@ -655,7 +749,7 @@ function TimesharingLearn() {
   return (
     <div>
       <Orientation>Physical custody refers to how a child's time is divided between parents. It defines where the child resides on a day-to-day basis and how time is structured across households. Getting clarity on how these structures work, before you are in the room negotiating them, changes your capacity to participate in that conversation.</Orientation>
-      <P>Different states use different terminology: parenting time, residential responsibility, time-sharing. The underlying concept is the same. A parenting plan sets out a defined schedule so both parents understand when the child will be in their care. This typically includes a repeating schedule or pattern, defined transitions between households, and adjustments for holidays, school breaks, and special circumstances.</P>
+      <P>Different states use different terminology: parenting time, residential responsibility, time-sharing. The underlying concept is the same. A parenting plan sets out a defined schedule so both parents understand when the child will be in their care. This typically includes a repeating schedule or pattern and defined transitions between households. It will also account for adjustments related to holidays, school breaks, and special circumstances.</P>
       <P>Parenting time is not limited to a small set of predefined schedules. Most plans reflect a range of arrangements based on the child's needs and the practical realities of each family. Many plans combine elements from multiple approaches.</P>
       <SH>The Goal of a Time-Sharing Structure</SH>
       <P>Every parent wants the schedule that works best for their child. That is the right goal. What the process often reveals is that the perfect schedule, the one that accounts for every variable perfectly, is rarely achievable. What is achievable is a schedule that is predictable, workable, and sustainable over time, and that can adapt as circumstances change.</P>
@@ -703,7 +797,7 @@ function TimesharingCompare() {
   };
   return (
     <div>
-      <Orientation>Select one or more schedule types to see how they work in practice. Most parenting plans combine elements from multiple approaches, understanding each helps you think through what fits your situation.</Orientation>
+      <Orientation>These schedule types are reference points, not rigid categories. Most parenting plans draw on elements from more than one approach. Understanding how each works helps you think through what fits your situation before you are in the room deciding.</Orientation>
       <div style={{fontSize:11,color:SLATE,marginBottom:14}}>Tap any schedule to open it. Multiple schedules can be open at the same time for comparison.</div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         {SCHEDULES.map(s => {
@@ -831,7 +925,7 @@ function LegalCustodyLearn() {
         ))}
       </div>
       <SH>Areas That May Be Less Clearly Defined</SH>
-      <P>Not all decisions fall neatly into major or day-to-day categories. Some depend on the child's age, the family's values, and how the plan is written. Examples include participation in religious ceremonies beyond regular practice; ear piercing or other non-medically necessary procedures; dietary choices tied to cultural or lifestyle preferences; and hairstyle or grooming choices with personal or cultural significance. In some plans these are addressed directly. In others, they are handled by the parent with the child at the time unless they rise to a level both parents consider significant.</P>
+      <P>Not all decisions fall neatly into major or day-to-day categories. Some depend on the child's age, the family's values, and how the plan is written. Examples include participation in religious ceremonies beyond regular practice; piercings or other non-medically necessary procedures; dietary choices tied to cultural or lifestyle preferences; and hairstyle or grooming choices with personal or cultural significance. In some plans these are addressed directly. In others, they are handled by the parent with the child at the time unless they rise to a level both parents consider significant.</P>
       <ChildPerspective items={[
         "It is beneficial to the child when both parents are working toward a common understanding of how major decisions will be made, even when they do not fully agree.",
         "When parents disagree on a major decision, the process of reaching resolution may take longer and can create strain if not approached carefully.",
@@ -846,7 +940,7 @@ function LegalCustodyLearn() {
       <P><strong style={{color:NAVY,fontWeight:600}}>Status quo approach</strong>, the current arrangement remains in place until agreement is reached or further action is taken.</P>
       <ConsiderBlock>Disagreements over major decisions are among the most common sources of conflict after a parenting plan is in place. Joint legal custody requires ongoing communication. Sole legal custody reduces coordination but concentrates authority. Depending on the circumstances, one structure may be more appropriate than the other.</ConsiderBlock>
       <CommonQs items={[
-        {q:"Does joint legal custody mean both parents must agree on everything?",a:"Joint legal custody applies to major decisions, education, non-emergency medical care, religious upbringing, and significant activities. Day-to-day decisions during each parent's parenting time are made independently by that parent. The plan should define clearly what requires joint agreement and what does not. Without that clarity, the line between major and day-to-day decisions becomes a recurring source of conflict."},
+        {q:"Does joint legal custody mean both parents must agree on everything?",a:"No. Joint legal custody applies to major decisions, education, non-emergency medical care, religious upbringing, and significant activities. Day-to-day decisions during each parent's parenting time are made independently by that parent. What joint legal custody requires is a plan for how parents will reach agreement or work through disagreement on major issues, not agreement on everything. The third question in this section addresses what happens when that process breaks down."},
         {q:"Can one parent make an emergency medical decision alone?",a:"Yes. Emergency care is handled by the parent with the child at the time. The obligation is to notify the other parent as soon as reasonably possible. Most plans address this explicitly."},
         {q:"What happens if we have joint custody but truly cannot agree on something?",a:"The plan's dispute resolution process applies. Most plans include a defined path, good-faith consultation, then third-party involvement, then potentially court action. Without a defined process in the plan, an impasse on a major decision may require court intervention to resolve."},
       ]} />
@@ -873,7 +967,7 @@ function LegalCustodyCompare() {
         "Ongoing communication about the child's education, health, and development is built into the structure",
       ],
       helpsWorkWell:[
-        "Clearly define what information the non-deciding parent receives and when",
+        "Clearly define what information each parent receives about major decisions and when",
         "Establish a consultation process with a defined timeline before decisions are finalized",
         "Agree in advance on what happens when consensus cannot be reached",
         "Keep communication focused on the child's needs",
@@ -926,16 +1020,16 @@ function LegalCustodyCompare() {
               {isOpen&&<div style={{padding:"0 17px 18px"}}>
                 <P>{o.desc}</P>
                 <CollapsibleSubsection label="WHAT THIS LOOKS LIKE IN PRACTICE">
-                  <CoordBlock intro={null} items={o.inPractice} />
+                  <CoordBlock intro={null} items={o.inPractice} showHeader={false} />
                 </CollapsibleSubsection>
                 <CollapsibleSubsection label="WHAT HELPS THIS WORK WELL">
-                  <HelpsWorkWell items={o.helpsWorkWell} />
+                  <HelpsWorkWell items={o.helpsWorkWell} showHeader={false} />
                 </CollapsibleSubsection>
                 <CollapsibleSubsection label="WHAT THIS LOOKS LIKE FROM THE CHILD'S PERSPECTIVE">
-                  <ChildPerspective items={o.childPerspective} />
+                  <ChildPerspective items={o.childPerspective} showHeader={false} />
                 </CollapsibleSubsection>
                 <CollapsibleSubsection label="EXAMPLE LANGUAGE">
-                  <ExampleBlock>{o.example}</ExampleBlock>
+                  <ExampleBlock showHeader={false}>{o.example}</ExampleBlock>
                 </CollapsibleSubsection>
               </div>}
             </div>
@@ -961,7 +1055,7 @@ function EdMedActLearn() {
       <ChildPerspective items={[
         "The child may experience school routines across one or both households with varying levels of consistency depending on coordination between parents.",
         "Homework and preparation may be handled differently in different environments.",
-        "Expectations vary depending on coordination between households.",
+        "Expectations may vary depending on coordination between households.",
         "School events may involve one or both parents, depending on the plan and the relationship between households.",
       ]} />
       <CoordBlock
@@ -990,13 +1084,12 @@ function EdMedActLearn() {
         "When communication between parents about health care is seamless, the child's care feels more coordinated and less stressful.",
       ]} />
       <CoordBlock
-        intro="Medical care may require coordination between households to support the child's continuity of care."
+        intro="Medical care requires a few active logistics between households."
         items={[
-          "Scheduling and notification of appointments",
-          "Both parents listed directly with medical providers and able to communicate independently",
-          "Access to medical records and provider communications",
-          "Sharing diagnoses, treatment updates, and reports promptly",
-          "Communication following appointments or changes in care",
+          "Scheduling appointments and notifying the other parent in advance",
+          "Ensuring both parents are actively listed with providers and can communicate independently",
+          "Sharing appointment summaries, diagnoses, and treatment updates promptly after they occur",
+          "Communicating about any changes in care or ongoing prescriptions",
         ]}
       />
       <ExampleBlock>Both parents shall have access to the child's medical records and may communicate directly with health care providers. The parent obtaining medical services shall provide relevant information and documentation to the other parent following the appointment. Non-emergency medical decisions shall be made in accordance with the legal custody provisions of this plan.</ExampleBlock>
@@ -1015,12 +1108,12 @@ function EdMedActLearn() {
         "When attendance and transportation happen seamlessly regardless of which home the child is in, the disruption to the child is minimized.",
       ]} />
       <CoordBlock
-        intro="Activities may require coordination between households around scheduling, transportation, and cost."
+        intro="Once activities are agreed upon, a few logistics require active management between households."
         items={[
-          "Agreement on enrollment before activities begin",
-          "Transportation responsibility and scheduling for practices, games, and events",
-          "Communication regarding changes, cancellations, or added commitments",
-          "Financial responsibility for participation costs and equipment",
+          "Confirming enrollment agreements in writing before commitments are made",
+          "Transportation scheduling for practices, games, and events during each parent's time",
+          "Notifying the other parent of changes, cancellations, or new commitments",
+          "Documenting and reimbursing agreed costs within the defined timeframe",
         ]}
       />
       <ConsiderBlock>If a parent enrolls the child in an activity without agreement, that parent may be responsible for the associated costs. Most plans address this directly. Both parents are generally entitled to attend the child's activities regardless of custody structure.</ConsiderBlock>
@@ -1044,7 +1137,7 @@ function EdMedActLearn() {
 function TransportationLearn() {
   return (
     <div>
-      <Orientation>Exchanges are a recurring part of shared parenting life. How they happen, when, where, how briefly, and who is responsible, shapes the child's experience of moving between homes more than parents often realize.</Orientation>
+      <Orientation>Exchanges are a recurring part of shared parenting life. The logistics surrounding them shape the child's experience of moving between homes more than parents often realize.</Orientation>
       <P>Parenting plans typically define how exchanges take place, including timing, location, and responsibility. These provisions create a predictable structure for transitions and help both parents understand their roles.</P>
       <SH>Exchange Structure</SH>
       <P>Exchanges typically occur at defined times and locations. Some plans use one parent's residence, both residences, a neutral exchange location, or the child's school or daycare. School-based exchanges are common during the school year, one parent drops off, the other picks up.</P>
@@ -1062,12 +1155,12 @@ function TransportationLearn() {
         "Having familiar items available in both homes reduces what the child needs to carry and what the exchange needs to coordinate.",
       ]} />
       <CoordBlock
-        intro="Exchange structure may require both parents to manage a few recurring logistics."
+        intro="Exchange structure requires both parents to stay on top of a few recurring logistics."
         items={[
-          "Exchange times and locations for school days and non-school days",
-          "Responsibility for transportation to and from exchanges",
-          "Communication regarding delays or changes before they occur",
-          "Expectations around the length and tone of exchanges",
+          "Confirming exchange times and locations for school days and non-school days",
+          "Who is responsible for transportation in each scenario",
+          "Communicating delays before they happen, not at the exchange itself",
+          "Notifying each other of any changes to the expected pickup or dropoff",
         ]}
       />
       <ConsiderBlock>Real-world commute conditions, traffic, school pickup windows, activity start times, affect how easily exchanges fit into daily routines. The number and timing of exchanges influences how transitions are experienced. Extended or emotionally charged exchanges are harder on children, particularly younger ones and during periods of adjustment.</ConsiderBlock>
@@ -1087,18 +1180,17 @@ function TransportationLearn() {
         "Consistent transportation arrangements reduce the uncertainty of transitions.",
       ]} />
       <CoordBlock
-        intro="Transportation responsibility may require clear assignment and communication between parents."
+        intro="Once transportation responsibility is defined, these are the logistics that need to be actively managed."
         items={[
-          "Which parent is responsible for pick-up and drop-off in each exchange scenario",
-          "Timing expectations and what constitutes on time",
-          "How delays are communicated and within what timeframe",
-          "What happens if transportation arrangements fall through",
+          "Confirming pickup and dropoff responsibility for each type of exchange",
+          "Notifying the other parent of delays as early as possible, not at the last minute",
+          "Checking in when arrangements change unexpectedly",
         ]}
       />
       <ExampleBlock>The parent beginning their custodial period shall be responsible for picking up the child from school or the other parent's residence. Each parent shall be responsible for their own transportation costs. If a delay occurs, the delayed parent shall notify the other parent as soon as reasonably possible.</ExampleBlock>
       <SectionDivider />
       <SH>Third-Party Exchanges</SH>
-      <P>In some situations, exchanges involve a third party, a family member, a school, a daycare, or another agreed-upon individual, or take place at a designated neutral location rather than either parent's home. Third-party exchanges can reduce direct contact between parents at transitions, which may support smoother handoffs when direct interaction is difficult.</P>
+      <P>In some situations, exchanges can involve a third party at a different agreed-upon location. This could be a non-parental family member picking the child up, or a trusted individual at a school or daycare. Third-party exchanges can reduce direct contact between parents at transitions, which may support smoother handoffs when direct interaction is difficult.</P>
       <CoordBlock
         intro="Third-party exchanges may require clear communication and defined expectations."
         items={[
@@ -1160,13 +1252,12 @@ function CommunicationLearn() {
         "Maintaining clear communication around scheduling, pickups, school, and activities keeps the child focused on their own life rather than caught up in their parents' logistics.",
       ]} />
       <CoordBlock
-        intro="Parent-to-parent communication requires a few ongoing logistics to function well."
+        intro="Keeping parent-to-parent communication functional involves staying on top of a few recurring logistics."
         items={[
-          "Designated method of communication and primary platform",
-          "Timing expectations for responses",
-          "Sharing of schedule changes or updates",
-          "Communication regarding school, medical care, and activities",
-          "How to reach each other in an emergency",
+          "Using the designated platform consistently so there is one place to look for communications",
+          "Responding within a reasonable timeframe, particularly for time-sensitive matters",
+          "Sharing schedule changes, updates, and relevant information proactively",
+          "Knowing how to reach each other outside normal channels in an emergency",
         ]}
       />
       <ConsiderBlock>Differences in communication style or expectations may affect how information is shared. At times, communication may become limited, delayed, or more difficult. Clear structure can help maintain continuity when communication is not consistent.</ConsiderBlock>
@@ -1282,8 +1373,9 @@ function ModificationLearn() {
     <div>
       <Orientation>Parenting plans are designed to provide structure, but circumstances change across both households. How a plan is built to adapt, and how disagreements are handled when they arise, shapes whether the plan continues to serve the child over time or becomes a recurring source of conflict.</Orientation>
       <SH>How Parenting Plans Change Over Time</SH>
-      <P>Plans may go through the process of modification when circumstances change. The child's age or developmental needs may shift. School schedules evolve. Work availability changes. Parents may relocate. It is worth knowing that modification is not simply a matter of both parents agreeing and writing it down, there is generally a threshold that must be met, whether that is a meaningful change in circumstances or a determination that a change serves the best interest of the child. The Questions section below addresses this in more detail.</P>
-      <P>Some changes are handled informally by agreement. Others require a more structured process. Over time, informal adjustments may develop without being reflected in the written plan, which can create ambiguity about what the plan actually requires.</P>
+      <P>Two different types of change happen within parenting plans over time, and it helps to understand them separately.</P>
+      <P>The first is informal flexibility, parents who have a working relationship often adjust scheduling informally as life shifts. A weekend swap here, a schedule change during a school break there. These informal adjustments are common and often practical. The risk is that they may not be enforceable if the relationship later deteriorates and they were never documented.</P>
+      <P>The second is formal modification, a meaningful change to the structure of the parenting plan itself. This is not simply a matter of both parents agreeing and writing something down. Courts generally require that a meaningful change in circumstances has occurred, or that a modification clearly serves the best interest of the child. The Questions section below addresses this threshold in more detail.</P>
       <HelpsWorkWell items={[
         "Communicate clearly and in advance when a change is being considered.",
         "Document agreed changes in writing, even when the change seems minor.",
@@ -1359,7 +1451,7 @@ function NegotiationLearn() {
     <div>
       <Orientation>In some respects, this entire process is a negotiation, from the first informal conversation about arrangements to the final document. This section focuses on what that negotiation experience actually looks like in practice, where it tends to stall, and what helps it move forward.</Orientation>
       <SH>How Parenting Plans Are Reached</SH>
-      <P>Parenting plans are developed through discussion, negotiation, or mediation. Parents rarely begin with complete agreement. The structure takes shape gradually as different topics are considered and resolved. Resolution often occurs over time through discussion rather than all at once. Some areas feel straightforward. Others require more time, clarification, or adjustment.</P>
+      <P>Parenting plans are developed through discussion and negotiation. Often times this process involves attorneys and mediators. Parents seldom begin with complete agreement, and the structure takes shape gradually as different topics are considered and resolved. Resolution at the end of the process occurs over a period of time rather than all at once. Some areas feel straightforward while others require more time for clarification and adjustment.</P>
       <HelpsWorkWell items={[
         "Understand what each part of the parenting plan is for before you begin negotiating it.",
         "Know how decisions translate into daily life. This makes it easier to evaluate options clearly.",
@@ -1398,7 +1490,7 @@ function NegotiationLearn() {
       />
       <SectionDivider />
       <SH>Working with Professionals</SH>
-      <P>Attorneys, mediators, and parenting coordinators can assist in organizing discussions, clarifying options, or helping parents move through areas where agreement is more difficult to reach. Having a working understanding of how parenting plan components function improves the quality of those interactions. You are better able to ask specific questions and properly evaluate what is being proposed.</P>
+      <P>Attorneys, mediators, and parenting coordinators can be extremely helpful in organizing discussions, clarifying options, or helping parents move through areas where agreement is more difficult to reach. Having a working understanding of how parenting plan components function improves the quality of those interactions because you will be better equipped to ask specific questions and properly evaluate what is being proposed.</P>
       <CoordBlock
         intro="Working with professionals involves a few practical realities."
         items={[
@@ -1483,7 +1575,7 @@ function AdditionalLearn() {
   const toggle = (i) => { setOpenSet(prev => { const next = new Set(prev); next.has(i)?next.delete(i):next.add(i); return next; }); };
   return (
     <div>
-      <Orientation>Parenting plans vary widely in what they include beyond the core provisions. The topics here are examples of provisions that appear in many plans, not an exhaustive list. Every family dynamic is a little different, and often a lot different, which means each unique parenting plan reflects that. The goal is to ensure that you know there is optionality surrounding more family-specific topics in a parenting plan. Some of these provisions will be directly relevant to your circumstances. Others may not apply at all.</Orientation>
+      <Orientation>Parenting plans vary widely in what they include beyond the core provisions. The topics here are examples of provisions that appear in many parenting plans, though the list is not exhaustive. Every family dynamic is a little different, and often a lot different, which means each unique parenting plan reflects that. The goal is to ensure that you know there is optionality surrounding more family-specific topics in a parenting plan. Some of these provisions will be directly relevant to your circumstances. Others may not apply at all.</Orientation>
       <div style={{display:"flex",flexDirection:"column",gap:9,marginTop:16}}>
         {provisions.map((p,i) => {
           const isOpen = openSet.has(i);
@@ -1846,7 +1938,7 @@ export default function PPPS() {
             ))}
           </div>
 
-          <div style={{padding:"10px 11px",borderTop:`1px solid ${RULE}`}}>
+          <div style={{padding:"10px 11px 36px",borderTop:`1px solid ${RULE}`}}>
             <div style={{fontSize:9,fontWeight:700,letterSpacing:"0.1em",color:"#444",marginBottom:4}}>QUICK NOTES</div>
             <textarea value={session.quick_notes} onChange={e=>handleNotes(e.target.value)} placeholder="Park thoughts here as you read..." rows={4} style={{width:"100%",border:`1px solid ${RULE}`,borderRadius:6,padding:"6px 8px",fontSize:11,color:NAVY,fontFamily:"Inter,sans-serif",resize:"none",background:"#FAFAF8",boxSizing:"border-box",outline:"none"}} />
           </div>
