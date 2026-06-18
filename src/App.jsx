@@ -204,7 +204,7 @@ const SCHEDULES = [
       "Communicate regularly about schedules, activities, and the child's week.",
     ],
     childPerspective: [
-      "Frequent moves between households may require an adjustment period as the child settles into each home's rhythm. The regularity of the pattern, once established, can help.",
+      "Frequent transitions may require the child to repeatedly shift between household routines throughout the week. As the pattern becomes familiar, the predictability of the schedule can help reduce uncertainty.",
       "Having familiar items available in both homes and vehicles may help the child feel grounded across frequent transitions. School materials, clothing, and medications may need to be duplicated between households.",
       "When routines such as bedtime and homework are consistent across both homes, the child is less likely to experience the frequency of exchanges as disorienting.",
       "The child stays in regular physical contact with both parents throughout the week, regardless of how contact is also maintained during the other parent's time.",
@@ -298,7 +298,7 @@ const SCHEDULES = [
       "Communication with the non-timesharing parent may be less predictable during work periods due to the demands and location of that parent's job.",
       "The parent who is home between work cycles often has greater flexibility to be fully present, which can make that time feel more immersive for the child.",
     ],
-    coordination: "Track and share upcoming work schedules as early as possible. Notify the other parent of changes promptly when they occur. Keep a record of schedule communications so both parents have a shared reference point.",
+    coordination: "Communication with the non-timesharing parent during work periods may need coordination, since the working parent's availability may be limited. Establishing how the child can stay in contact during those periods, and how schedule changes are communicated when they occur, reduces uncertainty for the child and both parents.",
     considerations: "Work-based schedules are less predictable and require more ongoing coordination than fixed-day structures. Plans for these arrangements benefit significantly from explicit language around advance notice requirements, flexibility expectations, and how schedule changes are communicated and documented.",
     example: "The parties shall share physical custody based on Parent A's work schedule. Parent A shall provide advance notice of work periods and available parenting time no later than [X] days in advance. Parenting time shall occur during periods of availability, with the child residing with Parent B during work periods. The parties shall coordinate scheduling to maintain consistency for the child.",
   },
@@ -797,7 +797,7 @@ function TimesharingCompare() {
   };
   return (
     <div>
-      <Orientation>These schedule types are reference points, not rigid categories. Most parenting plans draw on elements from more than one approach. Understanding how each works helps you think through what fits your situation before you are in the room deciding.</Orientation>
+      <Orientation>These schedule types are reference points, not rigid categories. Understanding how each works helps you think through what fits your situation before you are in the room deciding.</Orientation>
       <div style={{fontSize:11,color:SLATE,marginBottom:14}}>Tap any schedule to open it. Multiple schedules can be open at the same time for comparison.</div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         {SCHEDULES.map(s => {
@@ -1084,12 +1084,12 @@ function EdMedActLearn() {
         "When communication between parents about health care is seamless, the child's care feels more coordinated and less stressful.",
       ]} />
       <CoordBlock
-        intro="Medical care requires a few active logistics between households."
+        intro="Medical care involves a few recurring communication subjects between parents."
         items={[
-          "Scheduling appointments and notifying the other parent in advance",
-          "Ensuring both parents are actively listed with providers and can communicate independently",
-          "Sharing appointment summaries, diagnoses, and treatment updates promptly after they occur",
-          "Communicating about any changes in care or ongoing prescriptions",
+          "Who informs the other parent after an appointment, and within what timeframe",
+          "How urgent health issues are communicated outside of normal channels",
+          "How provider recommendations, diagnoses, and treatment plans are shared",
+          "How disagreements about a medical decision are raised and addressed",
         ]}
       />
       <ExampleBlock>Both parents shall have access to the child's medical records and may communicate directly with health care providers. The parent obtaining medical services shall provide relevant information and documentation to the other parent following the appointment. Non-emergency medical decisions shall be made in accordance with the legal custody provisions of this plan.</ExampleBlock>
@@ -1108,12 +1108,12 @@ function EdMedActLearn() {
         "When attendance and transportation happen seamlessly regardless of which home the child is in, the disruption to the child is minimized.",
       ]} />
       <CoordBlock
-        intro="Once activities are agreed upon, a few logistics require active management between households."
+        intro="Activities generate a set of recurring communication topics between parents."
         items={[
-          "Confirming enrollment agreements in writing before commitments are made",
-          "Transportation scheduling for practices, games, and events during each parent's time",
-          "Notifying the other parent of changes, cancellations, or new commitments",
-          "Documenting and reimbursing agreed costs within the defined timeframe",
+          "Communicating schedule changes from coaches, schools, or activity organizers",
+          "Sharing activity calendars so both parents can plan around commitments",
+          "Discussing conflicts between activity schedules and parenting time before they become problems",
+          "Handling last-minute changes to practices, games, or events",
         ]}
       />
       <ConsiderBlock>If a parent enrolls the child in an activity without agreement, that parent may be responsible for the associated costs. Most plans address this directly. Both parents are generally entitled to attend the child's activities regardless of custody structure.</ConsiderBlock>
@@ -1146,7 +1146,6 @@ function TransportationLearn() {
         "Use consistent, predictable locations that feel neutral and familiar to the child.",
         "Keep exchanges brief and calm. The child's transition is easier when it is low-key.",
         "Define timing expectations clearly so both parents and the child know what to expect.",
-        "Communicate about delays before they happen, not at the exchange itself.",
       ]} />
       <ChildPerspective items={[
         "The child transitions between households at defined times. The experience of that transition depends heavily on how predictable and calm it is.",
@@ -1155,12 +1154,12 @@ function TransportationLearn() {
         "Having familiar items available in both homes reduces what the child needs to carry and what the exchange needs to coordinate.",
       ]} />
       <CoordBlock
-        intro="Exchange structure requires both parents to stay on top of a few recurring logistics."
+        intro="Exchange structure generates a few recurring communication topics between parents."
         items={[
-          "Confirming exchange times and locations for school days and non-school days",
-          "Who is responsible for transportation in each scenario",
-          "Communicating delays before they happen, not at the exchange itself",
-          "Notifying each other of any changes to the expected pickup or dropoff",
+          "How delays are communicated and within what timeframe",
+          "Who is notified when pickup or dropoff arrangements change unexpectedly",
+          "How school-day versus non-school-day exchanges are handled differently",
+          "What happens when weather, traffic, or other conditions affect timing",
         ]}
       />
       <ConsiderBlock>Real-world commute conditions, traffic, school pickup windows, activity start times, affect how easily exchanges fit into daily routines. The number and timing of exchanges influences how transitions are experienced. Extended or emotionally charged exchanges are harder on children, particularly younger ones and during periods of adjustment.</ConsiderBlock>
@@ -1180,11 +1179,11 @@ function TransportationLearn() {
         "Consistent transportation arrangements reduce the uncertainty of transitions.",
       ]} />
       <CoordBlock
-        intro="Once transportation responsibility is defined, these are the logistics that need to be actively managed."
+        intro="Transportation responsibility generates a few specific communication topics."
         items={[
-          "Confirming pickup and dropoff responsibility for each type of exchange",
-          "Notifying the other parent of delays as early as possible, not at the last minute",
-          "Checking in when arrangements change unexpectedly",
+          "How delays are communicated, who notifies whom and within what timeframe",
+          "When and how backup transportation is activated if primary plans fall through",
+          "Who is contacted if plans change unexpectedly close to the exchange time",
         ]}
       />
       <ExampleBlock>The parent beginning their custodial period shall be responsible for picking up the child from school or the other parent's residence. Each parent shall be responsible for their own transportation costs. If a delay occurs, the delayed parent shall notify the other parent as soon as reasonably possible.</ExampleBlock>
@@ -1205,7 +1204,7 @@ function TransportationLearn() {
       <SH>Personal Items and Preparedness</SH>
       <P>Exchanges often involve the movement of personal items, clothing, school materials, medications, a favorite toy, a comfort item. Maintaining the essentials in both homes reduces what the child needs to carry, simplifies exchanges, and keeps the handoff focused on the child rather than logistics.</P>
       <ChildPerspective items={[
-        "Having familiar items available in both homes reduces the sense of disruption during transitions.",
+        "Having familiar items available in both homes or vehicles reduces the sense of disruption during transitions.",
         "Not having to pack up belongings for every exchange makes the transition feel more routine and less like an event.",
       ]} />
       <CoordBlock
@@ -1252,12 +1251,13 @@ function CommunicationLearn() {
         "Maintaining clear communication around scheduling, pickups, school, and activities keeps the child focused on their own life rather than caught up in their parents' logistics.",
       ]} />
       <CoordBlock
-        intro="Keeping parent-to-parent communication functional involves staying on top of a few recurring logistics."
+        intro="Parent-to-parent communication covers a set of recurring topics that both parents need to stay current on."
         items={[
-          "Using the designated platform consistently so there is one place to look for communications",
-          "Responding within a reasonable timeframe, particularly for time-sensitive matters",
-          "Sharing schedule changes, updates, and relevant information proactively",
-          "Knowing how to reach each other outside normal channels in an emergency",
+          "Schedule changes and upcoming parenting time adjustments",
+          "School updates, events, and academic concerns",
+          "Medical appointments, health changes, and care decisions",
+          "Activity schedules, conflicts, and logistical changes",
+          "How to reach each other outside normal channels when something urgent comes up",
         ]}
       />
       <ConsiderBlock>Differences in communication style or expectations may affect how information is shared. At times, communication may become limited, delayed, or more difficult. Clear structure can help maintain continuity when communication is not consistent.</ConsiderBlock>
