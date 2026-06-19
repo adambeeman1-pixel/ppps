@@ -6,7 +6,7 @@ const STORAGE_KEY = "ppps_session_v1";
 
 // --- Supabase connection ---
 const SUPABASE_URL = "https://kyhsljmjibzlgomgmmkn.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_u0qrF7ZGzWc2e6WMNzPhyw_VOTUPdMx";
+ const SUPABASE_ANON_KEY = "sb_publishable_u0qrF7ZGzWc2e6WMNzPhyw_VOTUPdMx";
 const supabase =
   typeof window !== "undefined" && window.supabase
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -1716,6 +1716,7 @@ function AuthScreen() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const submit = async () => {
     setMsg("");
@@ -1726,7 +1727,7 @@ function AuthScreen() {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) { setMsg(error.message); }
-        else { setMsg("Account created. You can sign in now."); setMode("signin"); }
+        else { setSignupSuccess(true); }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) { setMsg(error.message); }
@@ -1736,6 +1737,26 @@ function AuthScreen() {
     }
     setBusy(false);
   };
+
+  if (signupSuccess) {
+    return (
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",padding:"24px",fontFamily:"Inter,sans-serif"}}>
+        <div style={{width:"100%",maxWidth:380,background:"#fff",border:`1px solid ${RULE}`,borderRadius:14,padding:"36px 28px",boxShadow:"0 4px 24px rgba(27,43,75,0.08)",textAlign:"center"}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:22,color:NAVY,marginBottom:14}}>Check Your Email</div>
+          <div style={{fontSize:14,color:SLATE,lineHeight:1.5,marginBottom:8}}>
+            We sent a confirmation link to <strong style={{color:NAVY}}>{email}</strong>.
+          </div>
+          <div style={{fontSize:14,color:SLATE,lineHeight:1.5,marginBottom:24}}>
+            Open it to confirm your account, then return here to sign in. The link may take a minute to arrive. Check your spam folder if you do not see it.
+          </div>
+          <button onClick={()=>{setSignupSuccess(false);setMode("signin");setMsg("");setPassword("");}}
+            style={{width:"100%",padding:"12px",background:NAVY,color:"#fff",border:"none",borderRadius:8,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"Inter,sans-serif"}}>
+            Back to Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",padding:"24px",fontFamily:"Inter,sans-serif"}}>
@@ -1756,6 +1777,9 @@ function AuthScreen() {
           style={{width:"100%",padding:"12px",background:NAVY,color:"#fff",border:"none",borderRadius:8,fontSize:14,fontWeight:600,cursor:busy?"default":"pointer",marginTop:12,fontFamily:"Inter,sans-serif",opacity:busy?0.7:1}}>
           {busy ? "Please wait..." : mode === "signup" ? "Create Account" : "Sign In"}
         </button>
+        {mode === "signup" && <div style={{fontSize:11,color:SLATE,textAlign:"center",marginTop:10,lineHeight:1.4}}>
+          You will receive an email to confirm your account before you can sign in.
+        </div>}
         <div style={{textAlign:"center",marginTop:18,fontSize:13,color:SLATE}}>
           {mode === "signup" ? "Already have an account? " : "Need an account? "}
           <span onClick={()=>{setMode(mode==="signup"?"signin":"signup");setMsg("");}}
@@ -2092,4 +2116,3 @@ export default function PPPS() {
     </div>
   );
 }
-
