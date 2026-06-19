@@ -4,6 +4,14 @@ const SCHEMA_VERSION = "1.0";
 const PRODUCT_VERSION = "ppps_v1";
 const STORAGE_KEY = "ppps_session_v1";
 
+// --- Supabase connection ---
+const SUPABASE_URL = "https://kyhsljmjibzlgomgmmkn.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5aHNsam1qaWJ6bGdvbWdtbWtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzIwMTIsImV4cCI6MjA5NzQwODAxMn0.4s3QaX8FxCGIn_jxJYpERbqTvuHmG7hrYD35zE8H7bEITH_ANON_KEY";
+const supabase =
+  typeof window !== "undefined" && window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
 const NAVY = "#1B2B4B";
 const AMBER = "#C9974A";
 const AMBER_LIGHT = "#FDF6E8";
@@ -14,16 +22,9 @@ function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-function initSession() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.schema_version === SCHEMA_VERSION) return parsed;
-    }
-  } catch(e) {}
+function blankSession(userId) {
   return {
-    user_id: generateId(),
+    user_id: userId || generateId(),
     session_id: generateId(),
     product_id: "ppps",
     product_version: PRODUCT_VERSION,
@@ -37,6 +38,10 @@ function initSession() {
     quick_notes: "",
     answers: {},
   };
+}
+
+function initSession() {
+  return blankSession();
 }
 
 const SECTIONS = [
@@ -1705,7 +1710,67 @@ function SummaryDrawer({ session, onClose }) {
   );
 }
 
+function AuthScreen() {
+  const [mode, setMode] = useState("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const submit = async () => {
+    setMsg("");
+    if (!email || !password) { setMsg("Enter your email and password."); return; }
+    if (!supabase) { setMsg("Connection unavailable. Refresh and try again."); return; }
+    setBusy(true);
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) { setMsg(error.message); }
+        else { setMsg("Account created. You can sign in now."); setMode("signin"); }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { setMsg(error.message); }
+      }
+    } catch (e) {
+      setMsg("Something went wrong. Try again.");
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",padding:"24px",fontFamily:"Inter,sans-serif"}}>
+      <div style={{width:"100%",maxWidth:380,background:"#fff",border:`1px solid ${RULE}`,borderRadius:14,padding:"32px 28px",boxShadow:"0 4px 24px rgba(27,43,75,0.08)"}}>
+        <div style={{fontFamily:"Georgia,serif",fontSize:22,color:NAVY,marginBottom:6,textAlign:"center"}}>Polaris Parenting Plan System</div>
+        <div style={{fontSize:13,color:SLATE,textAlign:"center",marginBottom:24}}>
+          {mode === "signup" ? "Create an account to save your progress." : "Sign in to continue your work."}
+        </div>
+        <label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:"#444",marginBottom:5}}>EMAIL</label>
+        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"
+          style={{width:"100%",border:`1px solid ${RULE}`,borderRadius:8,padding:"10px 12px",fontSize:14,color:NAVY,marginBottom:16,outline:"none",fontFamily:"Inter,sans-serif"}} />
+        <label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.08em",color:"#444",marginBottom:5}}>PASSWORD</label>
+        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete={mode==="signup"?"new-password":"current-password"}
+          onKeyDown={e=>{ if(e.key==="Enter") submit(); }}
+          style={{width:"100%",border:`1px solid ${RULE}`,borderRadius:8,padding:"10px 12px",fontSize:14,color:NAVY,marginBottom:8,outline:"none",fontFamily:"Inter,sans-serif"}} />
+        {msg && <div style={{fontSize:12,color:mode==="signin"?"#B23A3A":"#2C7A4B",margin:"8px 0 4px"}}>{msg}</div>}
+        <button onClick={submit} disabled={busy}
+          style={{width:"100%",padding:"12px",background:NAVY,color:"#fff",border:"none",borderRadius:8,fontSize:14,fontWeight:600,cursor:busy?"default":"pointer",marginTop:12,fontFamily:"Inter,sans-serif",opacity:busy?0.7:1}}>
+          {busy ? "Please wait..." : mode === "signup" ? "Create Account" : "Sign In"}
+        </button>
+        <div style={{textAlign:"center",marginTop:18,fontSize:13,color:SLATE}}>
+          {mode === "signup" ? "Already have an account? " : "Need an account? "}
+          <span onClick={()=>{setMode(mode==="signup"?"signin":"signup");setMsg("");}}
+            style={{color:AMBER,fontWeight:600,cursor:"pointer"}}>
+            {mode === "signup" ? "Sign in" : "Create one"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PPPS() {
+  const [authUser, setAuthUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [session, setSession] = useState(() => initSession());
   const [activeSection, setActiveSection] = useState(session.last_active_section || "intro");
   const [activeTab, setActiveTab] = useState("learn");
@@ -1716,9 +1781,73 @@ export default function PPPS() {
   const contentRef = useRef(null);
   const saveTimer = useRef(null);
 
-  const persist = useCallback((s) => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({...s, updated_at: new Date().toISOString()})); } catch(e) {}
+  const persist = useCallback(async (s) => {
+    if (!supabase || !s.user_id) return;
+    const row = {
+      session_id: s.session_id,
+      user_id: s.user_id,
+      product_id: s.product_id,
+      product_version: s.product_version,
+      schema_version: s.schema_version,
+      last_active_section: s.last_active_section,
+      last_active_tab: s.last_active_tab,
+      completion_status: s.completion_status,
+      completed_at: s.completed_at,
+      quick_notes: s.quick_notes,
+      answers: s.answers,
+      updated_at: new Date().toISOString(),
+    };
+    try {
+      await supabase.from("sessions").upsert(row, { onConflict: "session_id" });
+    } catch (e) {}
   }, []);
+
+  // Watch auth state: who is logged in
+  useEffect(() => {
+    if (!supabase) { setAuthReady(true); return; }
+    supabase.auth.getSession().then(({ data }) => {
+      setAuthUser(data?.session?.user || null);
+      setAuthReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setAuthUser(s?.user || null);
+    });
+    return () => { sub?.subscription?.unsubscribe?.(); };
+  }, []);
+
+  // When a user logs in, load their saved session from Supabase (or start fresh)
+  useEffect(() => {
+    if (!supabase || !authUser) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("sessions")
+          .select("*")
+          .eq("user_id", authUser.id)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+        if (cancelled) return;
+        if (data && data.length > 0) {
+          const row = data[0];
+          const loaded = {
+            ...blankSession(authUser.id),
+            ...row,
+            answers: row.answers || {},
+            quick_notes: row.quick_notes || "",
+          };
+          setSession(loaded);
+          setActiveSection(loaded.last_active_section || "intro");
+          setActiveTab(loaded.last_active_tab || "learn");
+        } else {
+          const fresh = blankSession(authUser.id);
+          setSession(fresh);
+          await persist(fresh);
+        }
+      } catch (e) {}
+    })();
+    return () => { cancelled = true; };
+  }, [authUser, persist]);
 
   const autosave = useCallback((s) => {
     setSaveIndicator("Saving...");
@@ -1829,6 +1958,18 @@ export default function PPPS() {
   // Responsive: check if mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // Auth gate: show loading until auth resolves, then login screen if signed out
+  if (supabase && !authReady) {
+    return (
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",fontFamily:"Inter,sans-serif",color:SLATE,fontSize:14}}>
+        Loading...
+      </div>
+    );
+  }
+  if (supabase && !authUser) {
+    return <AuthScreen />;
+  }
+
   return (
     <div style={{display:"flex",height:"100vh",fontFamily:"Inter,sans-serif",background:"#F8F6F1",overflow:"hidden",position:"relative"}}>
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",minWidth:0}}>
@@ -1844,6 +1985,7 @@ export default function PPPS() {
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             {saveIndicator&&<div style={{fontSize:11,color:"#bbb"}}>{saveIndicator}</div>}
+            {supabase&&authUser&&<button onClick={async()=>{await supabase.auth.signOut();}} style={{fontSize:11,color:SLATE,background:"none",border:`1px solid ${RULE}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontFamily:"Inter,sans-serif"}}>Sign out</button>}
             <button
               onClick={()=>setRailCollapsed(!railCollapsed)}
               title={railCollapsed?"Show progress":"Hide progress"}
@@ -1950,3 +2092,4 @@ export default function PPPS() {
     </div>
   );
 }
+
