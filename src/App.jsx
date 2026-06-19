@@ -6,7 +6,7 @@ const STORAGE_KEY = "ppps_session_v1";
 
 // --- Supabase connection ---
 const SUPABASE_URL = "https://kyhsljmjibzlgomgmmkn.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5aHNsam1qaWJ6bGdvbWdtbWtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzIwMTIsImV4cCI6MjA5NzQwODAxMn0.4s3QaX8FxCGIn_jxJYpERbqTvuHmG7hrYD35zE8H7bEITH_ANON_KEY";
+const SUPABASE_ANON_KEY = "sb_publishable_u0qrF7ZGzWc2e6WMNzPhyw_VOTUPdMx";
 const supabase =
   typeof window !== "undefined" && window.supabase
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
