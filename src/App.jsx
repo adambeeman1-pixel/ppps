@@ -1795,6 +1795,7 @@ function AuthScreen() {
 export default function PPPS() {
   const [authUser, setAuthUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [isActive, setIsActive] = useState(null); // null=unknown, false=locked, true=paid
   const [session, setSession] = useState(() => initSession());
   const [activeSection, setActiveSection] = useState(session.last_active_section || "intro");
   const [activeTab, setActiveTab] = useState("learn");
@@ -1838,6 +1839,26 @@ export default function PPPS() {
     });
     return () => { sub?.subscription?.unsubscribe?.(); };
   }, []);
+
+  // When logged in, check whether this account is activated (paid)
+  useEffect(() => {
+    if (!supabase || !authUser) { setIsActive(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("is_active")
+          .eq("id", authUser.id)
+          .single();
+        if (cancelled) return;
+        setIsActive(data ? !!data.is_active : false);
+      } catch (e) {
+        if (!cancelled) setIsActive(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [authUser]);
 
   // When a user logs in, load their saved session from Supabase (or start fresh)
   useEffect(() => {
@@ -1992,6 +2013,39 @@ export default function PPPS() {
   }
   if (supabase && !authUser) {
     return <AuthScreen />;
+  }
+
+  // Logged in but still checking activation status
+  if (supabase && authUser && isActive === null) {
+    return (
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",fontFamily:"Inter,sans-serif",color:SLATE,fontSize:14}}>
+        Loading...
+      </div>
+    );
+  }
+
+  // Logged in but account not activated (payment not yet confirmed)
+  if (supabase && authUser && isActive === false) {
+    return (
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6F1",padding:"24px",fontFamily:"Inter,sans-serif"}}>
+        <div style={{width:"100%",maxWidth:420,background:"#fff",border:`1px solid ${RULE}`,borderRadius:14,padding:"36px 30px",boxShadow:"0 4px 24px rgba(27,43,75,0.08)",textAlign:"center"}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:22,color:NAVY,marginBottom:14}}>Access Is Being Activated</div>
+          <div style={{fontSize:14,color:SLATE,lineHeight:1.55,marginBottom:14}}>
+            Thank you for your purchase. Your account is being activated, which usually takes a few hours.
+          </div>
+          <div style={{fontSize:14,color:SLATE,lineHeight:1.55,marginBottom:24}}>
+            You will receive an email as soon as your access is ready. You can close this page and return anytime by signing in.
+          </div>
+          <div style={{fontSize:12,color:SLATE,marginBottom:18,paddingTop:18,borderTop:`1px solid ${RULE}`}}>
+            If you have not completed your purchase yet, your access will activate once payment is confirmed.
+          </div>
+          <button onClick={async()=>{await supabase.auth.signOut();}}
+            style={{fontSize:13,color:SLATE,background:"none",border:`1px solid ${RULE}`,borderRadius:8,padding:"9px 18px",cursor:"pointer",fontFamily:"Inter,sans-serif"}}>
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
