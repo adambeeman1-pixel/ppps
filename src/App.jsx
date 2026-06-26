@@ -1848,11 +1848,11 @@ export default function PPPS() {
       try {
         const { data } = await supabase
           .from("profiles")
-          .select("is_active")
+          .select("ppps_active")
           .eq("id", authUser.id)
           .single();
         if (cancelled) return;
-        setIsActive(data ? !!data.is_active : false);
+        setIsActive(data ? !!data.ppps_active : false);
       } catch (e) {
         if (!cancelled) setIsActive(false);
       }
@@ -1870,6 +1870,7 @@ export default function PPPS() {
           .from("sessions")
           .select("*")
           .eq("user_id", authUser.id)
+          .eq("product_id", "ppps")
           .order("updated_at", { ascending: false })
           .limit(1);
         if (cancelled) return;
